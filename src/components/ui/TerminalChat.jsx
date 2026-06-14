@@ -1,81 +1,35 @@
 import { useState, useRef, useEffect } from "react";
 
 const BOOT_MESSAGES = [
-  { type: "system", text: "Abhi's Portfolio Assistant v1.0.0" },
-  { type: "system", text: 'Type "help" to see available queries, or ask anything about Abhi.' },
+  { type: "system", text: "Abhi's Portfolio Assistant v2.0.0 (RAG-powered)" },
+  { type: "system", text: 'Ask me anything about Abhi — skills, projects, experience, or type "help".' },
   { type: "divider" },
 ];
 
-function getResponse(query) {
-  const q = query.toLowerCase().trim();
-
-  if (q === "" || q === "help") {
-    return `Available queries:
+const HELP_TEXT = `Available topics:
   about       — Who is Abhi?
   skills      — Tech stack & tools
   experience  — Work history
-  projects    — Things I've built
-  contact     — How to reach me
+  projects    — Things he's built
+  contact     — How to reach him
   available   — Open to work?
 
-Or just ask in plain English!`;
+Or just ask in plain English — I'm AI-powered!`;
+
+async function fetchAIResponse(message, conversationHistory) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, conversationHistory }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error ?? "Request failed");
   }
 
-  if (q === "clear") return "__CLEAR__";
-
-  if (q.includes("hello") || q.includes("hi") || q.includes("hey") || q.includes("hola")) {
-    return "Hey there! I'm Abhi's portfolio assistant. Ask me anything about his skills, experience, or projects.";
-  }
-
-  if (q === "about" || q.includes("who is") || q.includes("who are") || q.includes("tell me about")) {
-    return "Abhi Patel is a Full Stack Developer with 3+ years of experience. He builds modern web applications with clean code and bold design — from React frontends to Node.js/Java backends. Passionate about performance and great UX.";
-  }
-
-  if (q === "skills" || q.includes("tech") || q.includes("stack") || q.includes("skill") || q.includes("know") || q.includes("language")) {
-    return `Frontend:  React, Next.js, TypeScript, Tailwind CSS, Redux
-Backend:   Node.js, Express, Java, Spring Boot, Python
-Database:  MongoDB, PostgreSQL, MySQL, Redis, Prisma
-DevOps:    AWS, Docker, Git, GitHub Actions
-Tools:     GraphQL, Kafka, Jest, Postman, Supabase`;
-  }
-
-  if (q === "experience" || q.includes("work") || q.includes("job") || q.includes("career") || q.includes("history")) {
-    return `2024 — Present  |  Full Stack Developer (Freelance)
-2023 — 2024     |  Frontend Developer Intern (Tech Startup)
-2022 — 2023     |  Junior Web Developer (Agency)
-2021 — 2022     |  CS Student & Self-Learner (University)`;
-  }
-
-  if (q === "projects" || q.includes("built") || q.includes("project") || q.includes("portfolio") || q.includes("work")) {
-    return `01. NexaUI Design System   — React component library (60+ components)
-02. DevTrack Task Manager  — Kanban app with real-time sync
-03. CryptoVision Analytics — Live crypto dashboard + WebSockets
-04. FlowAPI REST Builder   — Visual API designer (exports OpenAPI)
-05. PortfolioCraft          — No-code portfolio builder
-06. AlgoViz DSA Visualizer — 20+ algorithm animations`;
-  }
-
-  if (q === "contact" || q.includes("email") || q.includes("reach") || q.includes("message") || q.includes("dm")) {
-    return "Email: abhi@example.com\nGitHub: github.com/abhi\nLinkedIn: linkedin.com/in/abhipatel\n\nScroll down to the Contact section to get in touch!";
-  }
-
-  if (q === "available" || q.includes("hire") || q.includes("freelance") || q.includes("open to") || q.includes("available")) {
-    return "Yes! Abhi is currently open to freelance projects and full-time opportunities. He works remotely and is available worldwide.";
-  }
-
-  if (q.includes("age") || q.includes("old")) {
-    return "Abhi started coding in 2021 — so about 3+ years deep into the craft. Age is just a number; shipping products is what matters.";
-  }
-
-  if (q.includes("location") || q.includes("where") || q.includes("country") || q.includes("city")) {
-    return "Abhi works remotely and is available for opportunities worldwide.";
-  }
-
-  if (q.includes("education") || q.includes("degree") || q.includes("university") || q.includes("college")) {
-    return "Computer Science background — studied data structures, algorithms, and OOP. Built real-world projects alongside coursework to bridge theory and practice.";
-  }
-
-  return `Sorry, I don't have an answer for "${query}" yet. RAG integration is coming soon — I'll be able to answer anything about Abhi then!\n\nType "help" for available queries.`;
+  const data = await res.json();
+  return data.response;
 }
 
 export default function TerminalChat() {
@@ -83,6 +37,9 @@ export default function TerminalChat() {
   const [input, setInput] = useState("");
   const [cmdHistory, setCmdHistory] = useState([]);
   const [cmdIndex, setCmdIndex] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false);
+  // Conversation history for multi-turn context sent to the API
+  const [conversationHistory, setConversationHistory] = useState([]);
   const bodyRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -92,27 +49,64 @@ export default function TerminalChat() {
     }
   }, [history]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const cmd = input.trim();
-    if (!cmd) return;
+    if (!cmd || isLoading) return;
 
-    const response = getResponse(cmd);
-
-    if (response === "__CLEAR__") {
+    // Local commands — no API call needed
+    if (cmd.toLowerCase() === "clear") {
       setHistory(BOOT_MESSAGES);
+      setConversationHistory([]);
       setInput("");
       return;
     }
 
+    if (cmd.toLowerCase() === "help") {
+      setHistory((prev) => [
+        ...prev,
+        { type: "input", text: cmd },
+        { type: "output", text: HELP_TEXT },
+      ]);
+      setCmdHistory((prev) => [cmd, ...prev]);
+      setCmdIndex(-1);
+      setInput("");
+      return;
+    }
+
+    // Show user input + loading indicator immediately
     setHistory((prev) => [
       ...prev,
       { type: "input", text: cmd },
-      { type: "output", text: response },
+      { type: "loading" },
     ]);
     setCmdHistory((prev) => [cmd, ...prev]);
     setCmdIndex(-1);
     setInput("");
+    setIsLoading(true);
+
+    try {
+      const aiResponse = await fetchAIResponse(cmd, conversationHistory);
+
+      // Update conversation history for multi-turn context
+      setConversationHistory((prev) => [
+        ...prev,
+        { role: "user", content: cmd },
+        { role: "assistant", content: aiResponse },
+      ]);
+
+      setHistory((prev) => [
+        ...prev.filter((item) => item.type !== "loading"),
+        { type: "output", text: aiResponse },
+      ]);
+    } catch (err) {
+      setHistory((prev) => [
+        ...prev.filter((item) => item.type !== "loading"),
+        { type: "error", text: `Error: ${err.message}` },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -163,9 +157,23 @@ export default function TerminalChat() {
               </div>
             );
           }
+          if (item.type === "loading") {
+            return (
+              <div key={i} className="terminal-output-line">
+                <pre className="terminal-loading">thinking...</pre>
+              </div>
+            );
+          }
           if (item.type === "output") {
             return (
               <div key={i} className="terminal-output-line">
+                <pre>{item.text}</pre>
+              </div>
+            );
+          }
+          if (item.type === "error") {
+            return (
+              <div key={i} className="terminal-output-line terminal-error">
                 <pre>{item.text}</pre>
               </div>
             );
@@ -182,9 +190,10 @@ export default function TerminalChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="type a command..."
+          placeholder={isLoading ? "waiting for response..." : "type a command..."}
           autoComplete="off"
           spellCheck={false}
+          disabled={isLoading}
         />
       </form>
     </div>
