@@ -578,182 +578,6 @@ nav {
   margin: 4px;
 }
 
-/* ===== SKILLS CAROUSEL ===== */
-/* ===== SKILLS GLASS CAROUSEL ===== */
-/* ===== SKILLS GLASS SINGLE-LINE CAROUSEL ===== */
-/* #skills {
-  overflow: hidden;
-}
-
-.carousel-wrapper {
-  margin: 50px 0 0;
-  width: 100%;
-  padding: 22px 0;
-  position: relative;
-  overflow: hidden;
-
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.07),
-    rgba(255, 255, 255, 0.025)
-  );
-
-  border-top: 1px solid var(--border-hover);
-  border-bottom: 1px solid var(--border-hover);
-  border-radius: 0;
-
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-
-  box-shadow:
-    0 14px 45px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.carousel-wrapper::before,
-.carousel-wrapper::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 120px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.carousel-wrapper::before {
-  left: 0;
-  background: linear-gradient(90deg, var(--bg), transparent);
-}
-
-.carousel-wrapper::after {
-  right: 0;
-  background: linear-gradient(270deg, var(--bg), transparent);
-}
-
-.carousel-track {
-  display: flex;
-  align-items: center;
-  gap: 54px;
-  width: max-content;
-  margin-bottom: 0;
-}
-
-/* only use one visible row */
-.carousel-track.forward {
-  animation: scrollRight 70s linear infinite;
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-}
-
-/* hide second row */
-.carousel-track.backward {
-  display: none;
-}
-
-/* do NOT pause on hover */
-.carousel-wrapper:hover .carousel-track {
-  animation-play-state: running;
-}
-
-@keyframes scrollRight {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-.skill-card {
-  flex-shrink: 0;
-  width: auto;
-  height: auto;
-
-  background: transparent;
-  border: none;
-  border-radius: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 0;
-  cursor: default;
-
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-
-  transition: none;
-}
-
-.skill-card:hover {
-  transform: none;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-}
-.skill-card img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  filter: var(--logo-filter);
-}
-
-.skill-card:hover svg {
-  transform: none;
-}
-
-.skill-name {
-  font-family: 'Space Mono', monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  transition: none;
-}
-
-.skill-card:hover .skill-name {
-  color: var(--text-dim);
-}
-
-/* Light theme */
-[data-theme="light"] .carousel-wrapper {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.75),
-    rgba(255, 255, 255, 0.38)
-  );
-  box-shadow:
-    0 14px 40px rgba(15, 23, 42, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-
-@media (max-width: 768px) {
-  .carousel-wrapper {
-    padding: 18px 0;
-  }
-
-  .carousel-wrapper::before,
-  .carousel-wrapper::after {
-    width: 70px;
-  }
-
-  .carousel-track {
-    gap: 38px;
-  }
-
-  .skill-card svg {
-    width: 34px;
-    height: 34px;
-  }
-
-  .skill-name {
-    font-size: 0.56rem;
-  }
-} */
 
 /* ===== SKILLS LOGO GRID SHOWCASE ===== */
 /* ===== SKILLS LOGO GRID SHOWCASE ===== */
@@ -1463,6 +1287,165 @@ nav {
   color: var(--accent);
   box-shadow: 0 0 20px var(--glow);
   transform: translateY(-3px);
+}
+
+/* ===== TERMINAL SECTION ===== */
+#terminal {
+  padding: 100px 24px;
+}
+
+.terminal-wrapper {
+  margin-top: 56px;
+  display: flex;
+  justify-content: center;
+}
+
+.terminal-window {
+  width: 100%;
+  max-width: 700px;
+  background: #0C0C0C;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(0, 212, 255, 0.04);
+  cursor: text;
+  font-family: 'Space Mono', 'Courier New', monospace;
+}
+
+.terminal-titlebar {
+  background: #1E1E1E;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  user-select: none;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot-red    { background: #FF5F57; }
+.dot-yellow { background: #FFBD2E; }
+.dot-green  { background: #28CA41; }
+
+.terminal-title {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+}
+
+.terminal-titlebar-spacer {
+  width: 46px;
+  flex-shrink: 0;
+}
+
+.terminal-body {
+  padding: 18px 20px 8px;
+  min-height: 220px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: #c8c8c8;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.terminal-body::-webkit-scrollbar { width: 4px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+.terminal-system-line {
+  color: #6b7280;
+  font-size: 0.74rem;
+  margin-bottom: 4px;
+  white-space: pre-wrap;
+}
+
+.terminal-sys-prefix {
+  display: block;
+  color: #4b5563;
+  font-size: 0.7rem;
+  margin-bottom: 2px;
+}
+
+.terminal-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 10px 0 14px;
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+  margin-top: 10px;
+}
+
+.terminal-prompt-label {
+  color: #00d4ff;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+
+.terminal-cmd-text {
+  color: #f0f4ff;
+}
+
+.terminal-output-line {
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
+.terminal-output-line pre {
+  font-family: inherit;
+  font-size: 0.78rem;
+  line-height: 1.8;
+  color: #86efac;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #0C0C0C;
+}
+
+.terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #f0f4ff;
+  caret-color: #00d4ff;
+  letter-spacing: 0;
+}
+
+.terminal-input::placeholder {
+  color: #374151;
 }
 
 /* ===== FOOTER ===== */
